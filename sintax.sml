@@ -1,5 +1,5 @@
 (* Lenguaje funcional con pares y patrones *)
-(* Guille was here *)
+(* Guille and Michael were here *)
 
 (* Identificadores, variables, etc.
    Los identificadores son representados mediante hileras. *)
