@@ -60,6 +60,19 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
+ | RegExp (operador,argumento)
+      => let val operacion = evalExp ambiente operador
+             and operando  = evalExp ambiente argumento
+         in case operacion of
+              Primitiva funcion
+              => (funcion operando)
+            | Clausura (reglas,ambDef,ambRec) 
+              => aplicarReglas (ambDef <+> (desenrollar ambRec)) reglas operando
+            | _  (* cualquier otra cosa no es una función *)
+              => raise ErrorDeTipo "operador no es una funcion"
+         end
+  | _
+    => raise ErrorDeTipo "expresion no valida"
   | CondExp ([], else_clause)
       => ( case else_clause of
               Something else_clause => evalExp ambiente else_clause 
@@ -111,6 +124,7 @@ and IterInternal localVars cond finalExp localAmb ambiente
          | _                 => raise ErrorDeTipo "se esperaba valor booleano"
       end
 ;
+
 
 (* Los programas son expresiones en nuestro lenguaje.  Los unicos
    simbolos globales pre-definidos son los operadores unarios y
