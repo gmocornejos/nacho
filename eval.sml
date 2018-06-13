@@ -81,7 +81,7 @@ fun evalExp ambiente exp =
           in case condition of
               (ConstBool false) => evalExp ambiente (CondExp(tail, else_clause))
             | (ConstBool true)  => evalExp ambiente exp
-            | _                 => raise ErrorDeTipo "se esperaba valor booleano"
+            | _                 => raise ErrorDeTipo "[condExp] se esperaba valor booleano"
           end 
   | IterExp (localVars, cond, finalExp)
         => let val localAmb = IterVars ambiente localVars
