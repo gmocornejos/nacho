@@ -1,5 +1,9 @@
 (* Lenguaje funcional con pares y patrones *)
-(* Guille was here *)
+
+(* Cosas opcionales *)
+
+datatype 'a option = Nothing
+                   | Something of 'a
 
 (* Identificadores, variables, etc.
    Los identificadores son representados mediante hileras. *)
@@ -37,6 +41,8 @@ datatype Expresion =
          | LetExp     of Declaracion * Expresion 
          | ApExp      of Expresion * Expresion
          | AbsExp     of Reglas
+         | CondExp    of (Expresion * Expresion) list * Expresion option
+         | IterExp    of (Identificador * Expresion * Expresion) list * Expresion * Expresion
 
 and      Patron =
            ConstPat   of Literal

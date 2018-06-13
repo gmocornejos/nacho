@@ -9,6 +9,8 @@
 
 exception NoEsUnaFuncion of string
 and       NoSeAplicanReglas
+and       NoHayClausulaElse
+
 
 (* evalExp evalua una expresion en un ambiente; se
    produce un valor semantico. *)
@@ -58,9 +60,25 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
+  | CondExp ([], else_clause)
+      => ( case else_clause of
+              Something else_clause => evalExp ambiente else_clause 
+            | Nothing               => raise NoHayClausulaElse 
+         )
+  | CondExp ((cond,exp)::tail, else_clause)
+       => let val condition = evalExp ambiente cond
+          in case condition of
+              (ConstBool false) => evalExp ambiente (CondExp(tail, else_clause))
+            | (ConstBool true)  => evalExp ambiente exp
+            | _                 => raise ErrorDeTipo "se esperaba valor booleano"
+          end 
+  | IterExp (localVars, cond, finalExp)
+        => let val localAmb = IterVars ambiente localVars
+           in IterInternal localVars cond finalExp localAmb ambiente
+           end
 
 and aplicarReglas ambiente reglas valor =
-  case reglas of
+  (case reglas of
     []
     => raise NoSeAplicanReglas
   | (pat,exp)::masReglas
@@ -69,6 +87,29 @@ and aplicarReglas ambiente reglas valor =
        end
        handle PatronesNoConcuerdan   (* seguir con otras reglas *)
               => aplicarReglas ambiente masReglas valor
+  )
+
+(* Funciones para iterar *)
+
+and IterVars amb []
+    = []
+  | IterVars amb ((ident, initExp, updateExp)::tail)
+    = (ident |-> evalExp amb initExp) <+> IterVars amb tail
+
+and IterUpdate amb []
+    = []
+  | IterUpdate amb ((ident, initExp, updateExp)::tail)
+    = (ident |-> evalExp amb updateExp) <+> IterUpdate amb tail
+
+and IterInternal localVars cond finalExp localAmb ambiente
+    = let val condition = evalExp (localAmb <+> ambiente) cond
+      in case condition of
+           (ConstBool true)  => evalExp (localAmb <+> ambiente) finalExp
+         | (ConstBool false) => let val newLocalAmb = IterUpdate (localAmb <+> ambiente) localVars
+                                in IterInternal localVars cond finalExp newLocalAmb ambiente
+                                end
+         | _                 => raise ErrorDeTipo "se esperaba valor booleano"
+      end
 ;
 
 (* Los programas son expresiones en nuestro lenguaje.  Los unicos

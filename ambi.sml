@@ -46,3 +46,31 @@ fun map_ambiente f []
     = []
 |   map_ambiente f ((ident,valor)::amb)
     = (ident,(f valor))::(map_ambiente f amb)
+
+
+(* combinación de ambientes disyuntos *)
+
+exception DominiosNoDisyuntos
+
+fun existe ident []
+    = false
+|   existe ident ((ident',valor)::ambiente)
+    = if ident = ident' 
+      then true
+      else existe ident ambiente
+
+(* recorre un ambiente, buscando en el otro.  Si encuentra, hay error *)
+
+infix <|>
+
+fun amb1 <|> amb2 =
+  let fun comprueba []               = amb1 <+> amb2
+      |   comprueba ((ident,_)::amb) = if existe ident amb2 then
+                                         raise DominiosNoDisyuntos
+                                       else
+                                         comprueba amb
+  in
+    comprueba amb1
+  end
+
+
