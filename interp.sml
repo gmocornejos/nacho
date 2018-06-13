@@ -8,4 +8,4 @@ use "val.sml";     (* valores semanticos *)
 use "concord.sml"; (* concordancia de patrones *)
 use "opers.sml";   (* operaciones predefinidas del minilenguaje *)
 use "eval.sml";    (* el evaluador *)
-use "prufun.sml";  (* pruebitas *)
+

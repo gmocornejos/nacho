@@ -35,18 +35,18 @@ fun evalExp ambiente exp =
              and valD = evalExp ambiente expD
          in Par (valI, valD)
          end
-  | LetExp ((NoRecursiva,(pat,expLocal)), exp)
+(*  | LetExp ((NoRecursiva,(pat,expLocal)), exp)
       => let val valor    = evalExp ambiente expLocal
            ; val ambLocal = concordar pat valor
          in evalExp (ambiente <+> ambLocal) exp
-         end
+         end *)
     (* cuando una declaración local es recursiva, se prepara el
        ambiente "desenrollándolo" *)
-  | LetExp ((Recursiva,(pat,expLocal)), exp)
+(*  | LetExp ((Recursiva,(pat,expLocal)), exp)
       => let val valor    = evalExp ambiente expLocal
            ; val ambLocal = concordar pat valor
          in evalExp (ambiente <+> (desenrollar ambLocal)) exp
-         end
+         end *)
   | ApExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
              and operando  = evalExp ambiente argumento
@@ -60,7 +60,7 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
- | RegExp (operador,argumento)
+(*  | RegExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
              and operando  = evalExp ambiente argumento
          in case operacion of
@@ -70,9 +70,7 @@ fun evalExp ambiente exp =
               => aplicarReglas (ambDef <+> (desenrollar ambRec)) reglas operando
             | _  (* cualquier otra cosa no es una función *)
               => raise ErrorDeTipo "operador no es una funcion"
-         end
-  | _
-    => raise ErrorDeTipo "expresion no valida"
+         end *)
   | CondExp ([], else_clause)
       => ( case else_clause of
               Something else_clause => evalExp ambiente else_clause 
@@ -89,6 +87,8 @@ fun evalExp ambiente exp =
         => let val localAmb = IterVars ambiente localVars
            in IterInternal localVars cond finalExp localAmb ambiente
            end
+  | _
+    => raise ErrorDeTipo "expresion no valida"
 
 and aplicarReglas ambiente reglas valor =
   (case reglas of
