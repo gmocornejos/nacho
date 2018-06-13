@@ -83,6 +83,7 @@ fun evalExp ambiente exp =
             | (ConstBool true)  => evalExp ambiente exp
             | _                 => raise ErrorDeTipo "[condExp] se esperaba valor booleano"
           end 
+            (* localVars = (Identificador, initExp, updateExp) list *)
   | IterExp (localVars, cond, finalExp)
         => let val localAmb = IterVars ambiente localVars
            in IterInternal localVars cond finalExp localAmb ambiente
