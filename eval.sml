@@ -60,6 +60,10 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
+
+
+(*Inicia código de Mike*)
+
 (*  | RegExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
              and operando  = evalExp ambiente argumento
@@ -71,6 +75,9 @@ fun evalExp ambiente exp =
             | _  (* cualquier otra cosa no es una función *)
               => raise ErrorDeTipo "operador no es una funcion"
          end *)
+
+(*Inicia código de Mike*)
+
   | CondExp ([], else_clause)
       => ( case else_clause of
               Something else_clause => evalExp ambiente else_clause 
