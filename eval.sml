@@ -58,7 +58,7 @@ fun evalExp ambiente exp =
       => let val reg = evalExp ambiente exp
          in case reg of
               (Registro campos) => busca ident campos
-            | _                 => raise ErrorDeTipo "Identificador no exite en el registro"
+            | _                 => raise ErrorDeTipo "La expresion no retorna un valor-registro"
          end
   | CondExp ([], else_clause)
       => ( case else_clause of
@@ -78,7 +78,7 @@ fun evalExp ambiente exp =
            in IterInternal localVars cond finalExp localAmb ambiente
            end
   | _
-    => raise ErrorDeTipo "expresion no valida"
+    => raise ErrorDeTipo "expresion no valida para IterExp"
 
 and aplicarReglas ambiente reglas valor =
   (case reglas of
