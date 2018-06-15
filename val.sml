@@ -14,6 +14,7 @@ datatype Valor =
            * (Valor Ambiente) (* ambiente para resolver
                                  llamadas recursivas *)
          | Primitiva of Valor -> Valor
+         | Registro of (Identificador * Valor) list
 
 
 (* "Desenrollar" clausuras.

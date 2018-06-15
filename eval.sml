@@ -34,19 +34,11 @@ fun evalExp ambiente exp =
       => let val valI = evalExp ambiente expI
              and valD = evalExp ambiente expD
          in Par (valI, valD)
-         end
-(*  | LetExp ((NoRecursiva,(pat,expLocal)), exp)
-      => let val valor    = evalExp ambiente expLocal
-           ; val ambLocal = concordar pat valor
-         in evalExp (ambiente <+> ambLocal) exp
-         end *)
-    (* cuando una declaración local es recursiva, se prepara el
-       ambiente "desenrollándolo" *)
-(*  | LetExp ((Recursiva,(pat,expLocal)), exp)
-      => let val valor    = evalExp ambiente expLocal
-           ; val ambLocal = concordar pat valor
-         in evalExp (ambiente <+> (desenrollar ambLocal)) exp
-         end *)
+         end 
+  | LetExp (decl, exp)
+      => let val amb = evalDecl ambiente decl
+         in evalExp (ambiente <+> amb) exp
+         end 
   | ApExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
              and operando  = evalExp ambiente argumento
@@ -60,17 +52,14 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
-(*  | RegExp (operador,argumento)
-      => let val operacion = evalExp ambiente operador
-             and operando  = evalExp ambiente argumento
-         in case operacion of
-              Primitiva funcion
-              => (funcion operando)
-            | Clausura (reglas,ambDef,ambRec) 
-              => aplicarReglas (ambDef <+> (desenrollar ambRec)) reglas operando
-            | _  (* cualquier otra cosa no es una función *)
-              => raise ErrorDeTipo "operador no es una funcion"
-         end *)
+  | RegExp register
+      => Registro (map_ambiente (evalExp ambiente) register)
+  | CampoExp (exp, ident)
+      => let val reg = evalExp ambiente exp
+         in case reg of
+              (Registro campos) => busca ident campos
+            | _                 => raise ErrorDeTipo "Identificador no exite en el registro"
+         end
   | CondExp ([], else_clause)
       => ( case else_clause of
               Something else_clause => evalExp ambiente else_clause 
@@ -103,12 +92,42 @@ and aplicarReglas ambiente reglas valor =
               => aplicarReglas ambiente masReglas valor
   )
 
+(* Funcion para evaluar declaraciones *)
+
+and evalDecl ambiente decl =
+  case decl of
+    ValDecl (NoRecursiva, pat, expLocal)
+      => let val valor    = evalExp ambiente expLocal
+           ; val ambLocal = concordar pat valor
+         in ambLocal
+         end
+  | ValDecl (Recursiva, pat, expLocal)
+      => let val valor    = evalExp ambiente expLocal
+           ; val ambLocal = concordar pat valor
+         in desenrollar ambLocal
+         end
+  | AndDecl (decl1, decl2)
+      => let val amb1 = evalDecl ambiente decl1
+             val amb2 = evalDecl ambiente decl2
+         in amb1 <|> amb2
+         end
+  | SecDecl (decl1, decl2)
+      => let val amb1 = evalDecl ambiente decl1
+             val amb2 = evalDecl (ambiente <+> amb1) decl2
+         in amb1 <+> amb2
+         end
+  | LocalDecl (decl1, decl2)
+      => let val amb1 = evalDecl ambiente decl1
+             val amb2 = evalDecl (ambiente <+> amb1) decl2
+         in amb2
+         end
+
 (* Funciones para iterar *)
 
 and IterVars amb []
     = []
   | IterVars amb ((ident, initExp, updateExp)::tail)
-    = (ident |-> evalExp amb initExp) <+> IterVars amb tail
+    = (ident |-> evalExp amb initExp) <|> IterVars amb tail
 
 and IterUpdate amb []
     = []
