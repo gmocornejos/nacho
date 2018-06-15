@@ -35,18 +35,6 @@ fun evalExp ambiente exp =
              and valD = evalExp ambiente expD
          in Par (valI, valD)
          end
-(*  | LetExp ((NoRecursiva,(pat,expLocal)), exp)
-      => let val valor    = evalExp ambiente expLocal
-           ; val ambLocal = concordar pat valor
-         in evalExp (ambiente <+> ambLocal) exp
-         end *)
-    (* cuando una declaración local es recursiva, se prepara el
-       ambiente "desenrollándolo" *)
-(*  | LetExp ((Recursiva,(pat,expLocal)), exp)
-      => let val valor    = evalExp ambiente expLocal
-           ; val ambLocal = concordar pat valor
-         in evalExp (ambiente <+> (desenrollar ambLocal)) exp
-         end *)
   | ApExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
              and operando  = evalExp ambiente argumento
@@ -62,21 +50,29 @@ fun evalExp ambiente exp =
       => Clausura (reglas, ambiente, ambienteVacio)
 
 
-(*Inicia código de Mike*)
 
-(*  | RegExp (operador,argumento)
-      => let val operacion = evalExp ambiente operador
-             and operando  = evalExp ambiente argumento
-         in case operacion of
-              Primitiva funcion
-              => (funcion operando)
-            | Clausura (reglas,ambDef,ambRec) 
-              => aplicarReglas (ambDef <+> (desenrollar ambRec)) reglas operando
-            | _  (* cualquier otra cosa no es una función *)
-              => raise ErrorDeTipo "operador no es una funcion"
-         end *)
 
-(*Inicia código de Mike*)
+(* Inician intentos de de Mike
+
+ | LetExp ((NoRecursiva,(pat,expLocal)), exp)
+      => let val valor    = evalExp ambiente expLocal
+           ; val ambLocal = concordar pat valor
+         in evalExp (ambiente <+> ambLocal) exp
+         end 
+
+ | LetExp ((Recursiva,(pat,expLocal)), exp)
+      => let val valor    = evalExp ambiente expLocal
+           ; val ambLocal = concordar pat valor
+         in evalExp (ambiente <+> (desenrollar ambLocal)) exp
+         end 
+
+
+| RegExp 
+
+
+
+Finalizan intentos de Mike *)
+
 
   | CondExp ([], else_clause)
       => ( case else_clause of
@@ -96,7 +92,7 @@ fun evalExp ambiente exp =
            in IterInternal localVars cond finalExp localAmb ambiente
            end
   | _
-    => raise ErrorDeTipo "expresion no valida"
+    => raise ErrorDeTipo "expresion no valida para IterExp"
 
 and aplicarReglas ambiente reglas valor =
   (case reglas of
