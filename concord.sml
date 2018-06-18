@@ -22,8 +22,14 @@ fun concordar (ConstPat (Entera n)) (ConstInt n')
       (* se asocia ident con valor, en ambiente unitario *)
 |   concordar (ParPat (pati,patd)) (Par (vali,vald))
     = (concordar pati vali)
-      <+>                           (* extiende ambiente *)
+      <|>                           (* extiende ambiente *)
       (concordar patd vald)
+|   concordar (RegPat (ident::tail)) (Registro reg)
+    = (ident |-> (busca ident reg))
+      <|> 
+      (concordar (RegPat tail) (Registro reg))
+|   concordar (ComoPat (ident, pat)) valor
+    = (ident |-> valor) <+> (concordar pat valor)
 |   concordar Comodin _
     = ambienteVacio
       (* comodín concuerda con todo, no produce asociaciones *)

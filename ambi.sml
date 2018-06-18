@@ -38,9 +38,6 @@ fun busca ident []
     = if ident = ident'
       then valor
       else busca ident ambiente
-(*
-| _
-    => raise ErrorDeTipo "entradas no validas" *)
 
 (* La siguiente función aplica otra función sobre todos los
    pares (asociaciones) pertenecientes a un ambiente *)
